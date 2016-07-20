@@ -152,6 +152,14 @@ function initMaps(){
 	solid.addTo(map);
     }
 
+    if(getParam("dykes")){
+	dykes.addTo(map);
+    }
+
+    if(getParam("faults")){
+	faults.addTo(map);
+    }
+
 
     var baseMaps = {
 	"Mapnik": osm
