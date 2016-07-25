@@ -157,152 +157,23 @@ function initMaps(){
 	id: 'bear.mapnik'
     });
 
-    var contours = L.tileLayer('/tiles/contours/{z}/{x}/{y}.png', {
-	maxZoom: 16,
-	minZoom: 8,
-	id: 'bear.contours',
-	opacity: 0.3
-    });
-
-    var osgb = L.tileLayer('/tiles/grid/{z}/{x}/{y}.png', {
-	maxZoom: 16,
-	minZoom: 12,
-	id: 'bear.osgb'
-    });
-
-    var dykes = L.tileLayer('/tiles/dykes/{z}/{x}/{y}.png', {
-	maxZoom: 16,
-	id: 'bear.dykes',
-	opacity: 0.5,
-	attribution: '| Geology layers: Based upon DiGMapGB-625, with the permission of the British Geological Survey'
-    });
-
-    var faults = L.tileLayer('/tiles/faults/{z}/{x}/{y}.png', {
-	maxZoom: 16,
-	id: 'bear.faults',
-	opacity: 0.5,
-	attribution: '| Geology layers: Based upon DiGMapGB-625, with the permission of the British Geological Survey'
-    });
-
-    var solid = L.tileLayer('/tiles/solid/{z}/{x}/{y}.png', {
-	maxZoom: 16,
-	id: 'bear.solid',
-	opacity: 1.0,
-	attribution: '| Geology layers: Based upon DiGMapGB-625, with the permission of the British Geological Survey'
-    });
-
-    var newMarilynLayer = new L.MarkerClusterGroup({
-    	iconCreateFunction: function(cluster) {
-    	    var n = '<b>' + cluster.getChildCount() + '</b>';
-	    return new L.DivIcon({ 
-		html: n,
-		className: 'mycluster',
-		iconSize: L.point(40, 40)
-	    });
-	}
-    });
-
-    for(i=0;i<marilynsArray.length;i++){
-	var m = L.marker([marilynsArray[i].lat, marilynsArray[i].lng]).bindPopup(marilynsArray[i].hill_name);
-	newMarilynLayer.addLayer(m);
-    }
-
     postcodeLayer = L.geoJson(null,{
      	onEachFeature: onNewPostcode
 	}).addTo(map);
     onMove(null); // Init the postcodes.
 
     osm.addTo(map);
-    contours.addTo(map);
-    osgb.addTo(map);
-
-    if(getParam("marilyns")){
-	newMarilynLayer.addTo(map);
-    }
-
-    if(getParam("solid")){
-	solid.addTo(map);
-    }
-
-    if(getParam("dykes")){
-	dykes.addTo(map);
-    }
-
-    if(getParam("faults")){
-	faults.addTo(map);
-    }
-
 
     var baseMaps = {
 	"Mapnik": osm
     };
     var overlayMaps = {
-	"Contours": contours,
-	"OS Grid": osgb,
-	"Solid": solid,
-	"Dykes": dykes,
-	"Faults": faults,
-	"Marilyn Markers": newMarilynLayer,
 	"Postcodes": postcodeLayer
     };
 
     var layers = L.control.layers(baseMaps, overlayMaps);
-
     layers.addTo(map);
-
     map.addControl(new L.Control.Permalink({text: 'Permalink', layers: layers}));
-
-
-    var solidExplanationMarker = L.marker([0.0,0.0]).bindPopup("No popup content yet!");
-
-    map.on('click', function(e) {
-	if(map.hasLayer(solid)){
-	    var popupData = "Not Implemented Yet.<br>At "+e.latlng.lng+" "+e.latlng.lat;
-
-	    var xmlhttp = new XMLHttpRequest();
-	    xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-		    var r = JSON.parse(xmlhttp.responseText);
-
-		    var groupName = decodeURI(r.lex_d);
-		    var descr = decodeURI(r.rcs_d);
-		    var minMY = decodeURI(r.min_my);
-		    var maxMY = decodeURI(r.max_my);
-		    var maxPeriod = decodeURI(r.max_period);
-		    var minPeriod = decodeURI(r.min_period);
-
-		    var popupData = "";
-		    if(typeof groupName == "undefined" || groupName === ""){
-			popupData = "Unknown bedrock.";
-		    }else{
-			popupData = "<table class=\"descrTable\">"+
-				    "<tr><td>Name</td><td> "+groupName+"</td></tr>"+
-				    "<tr><td>Description</td><td>"+descr+"</td></tr>"+
-				    "<tr><td>Deposited between</td><td>"+
-					maxMY+
-					" million years ago ("+
-					maxPeriod+
-					"),<br>and<br>"+
-					minMY+
-					" million years ago ("+
-					minPeriod+
-					").</td></tr>\n</table>"
-				    ;
-		    }
-		    solidExplanationMarker
-			.setLatLng(e.latlng)
-			.addTo(map)
-			.setPopupContent(popupData)
-			.openPopup();
-		}
-	    }
-	    xmlhttp.open("GET", "http://www.rasilon.net/descr_for_location.cgi?lat="+e.latlng.lat+"&lng="+e.latlng.lng, true);
-	    xmlhttp.send();
-
-	}else{
-	    //alert("No solid");
-	}
-    });
     map.on('moveend', onMove);
 
 }
