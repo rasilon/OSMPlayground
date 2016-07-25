@@ -1,5 +1,4 @@
 var map;
-var postcodeMarkers = {};
 var postcodeLayer;
 
 var located = false;
@@ -82,41 +81,34 @@ function receiveMarkers(){
     if(xhrobj.readyState == 4) {
 	//console.log(xhrobj.responseText);
 	var stuff = JSON.parse(xhrobj.responseText);
-	console.log(stuff);
+	//console.log(stuff);
 	if(typeof stuff == 'undefined' || stuff.status != 'OK'){
 	    return;
 	}
-	var level;
+	var level = stuff.level;
+	if(level !== lastLevel){
+	    postcodeLayer.clearLayers();
+	    console.log("Clearing layer. Was "+lastLevel+" now "+level);
+	    lastLevel = level;
+	}
 	for (var prop in stuff) {
 	    // skip loop if the property is from prototype
 	    if(!stuff.hasOwnProperty(prop)) continue;
 	    if(prop == 'status') continue;
-	    if(prop == 'level'){
-		level = stuff.level;
-		if(level !== lastLevel){
-		    postcodeLayer.clearLayers();
-		    console.log("Clearing layer");
-		    lastLevel = level;
-		}
-		continue;
-	    }
+	    if(prop == 'level') continue;
 
-	    //console.log(prop + " = " + stuff[prop]);
-	    if(typeof postcodeMarkers[prop] == 'undefined'){
-		// Add it to the list, and to the map
-		postcodeMarkers[prop] = stuff[prop];
-		var feature = stuff[prop];
-		feature.properties = { popupContent: "<p>Level: "+level+"<br/>Location: " + prop + "<br/>Look, a banana!</p>"};
-		postcodeLayer.addData(stuff[prop]);
-	    }
+	    var feature = stuff[prop];
+	    var popupText = "<p>Level: "+level+
+			    "<br/>Location: " + prop + 
+			    "<br/>Look, a banana!</p>";
+    	    feature.properties = { popupContent: popupText};
+	    postcodeLayer.addData(stuff[prop]);
 	}
     }
 }
 
 function onMove(e){
-    console.log(e);
     var bounds = map.getBounds();
-    console.log(bounds);
     var params=
 	"w="+bounds.getWest() +
 	"&s="+ bounds.getSouth() +
@@ -124,7 +116,6 @@ function onMove(e){
 	"&n="+bounds.getNorth() +
 	"&zoom="+map.getZoom()
 	;
-    console.log(params);
     xhrobj = new XMLHttpRequest();
     xhrobj.onreadystatechange = receiveMarkers;
     var url = 'http://www.rasilon.net/postcodes_for_bounds.php?'+params;
