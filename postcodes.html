@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>The Bear's OSM thingy.</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+	<script src="marilyns.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+	<script src="control/Permalink.js"></script>
+	<script src="control/Permalink.Marker.js"></script>
+	<script src="control/Permalink.Layer.js"></script>
+	<script src="control/Layers.Load.js"></script>
+	<script src="control/leaflet.markercluster.js"></script>
+	<script src="postcodes.js"></script>
+	<style>
+	    @font-face {
+		font-family: 'Michroma';
+		font-style: normal;
+		font-weight: 400;
+		src: local('Michroma'),
+		    url(http://fonts.gstatic.com/s/michroma/v7/-1qPjVU14dEdanR8MQuQPfesZW2xOQ-xsNqO47m55DA.ttf)
+		    format('truetype');
+	    }
+
+	    body {
+		font-family: 'Michroma';
+	        padding: 0;
+		margin: 0;
+	    }
+	    html, body, #map {
+		height: 100%;
+	    }
+	    table {
+		font-family: 'Michroma';
+		border-collapse: collapse;
+	    }
+    
+	    th {
+		color: white;
+		background-color: DimGrey;
+	    }
+
+	    td {
+		padding-right: 5px;
+		padding-left: 5px;
+	    }
+
+	    table, th, td {
+		border: 1px solid lightgrey;
+	    }
+	    .mycluster {
+		width: 40px;
+		height: 40px;
+		background-color: lightblue;
+		text-align: center;
+    		font-size: 24px;
+	    }
+
+	</style>
+</head>
+<body onload="initMaps()" onunload="setCookie()">
+	<div id="map" ></div>
+</body>
+</html>
+
