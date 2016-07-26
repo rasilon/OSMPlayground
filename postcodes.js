@@ -86,6 +86,11 @@ function receiveMarkers(){
 	    return;
 	}
 	var level = stuff.level;
+	// We aren't bothering with caching, so clear
+	// the layer every time we get a new file.
+	postcodeLayer.clearLayers();
+
+	// Caching stuff.  Doesn't do anything useful at the moment.
 	if(level !== lastLevel){
 	    postcodeLayer.clearLayers();
 	    console.log("Clearing layer. Was "+lastLevel+" now "+level);
