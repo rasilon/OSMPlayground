@@ -67,8 +67,6 @@ function mapFromCookie(){
     return localmap;
 }
 
-var xhrobj;
-
 function onNewPostcode(feature, layer) {
     // does this feature have a property named popupContent?
     if (feature.properties && feature.properties.popupContent) {
@@ -77,38 +75,69 @@ function onNewPostcode(feature, layer) {
 }
 
 var lastLevel = "init";
-function receiveMarkers(){
-    if(xhrobj.readyState == 4) {
-	//console.log(xhrobj.responseText);
-	var stuff = JSON.parse(xhrobj.responseText);
-	//console.log(stuff);
+var postcodeCacheData = {};
+
+function receivePostcodeData(data){
+    if(data.readyState == 4) {
+	var stuff = JSON.parse(data.responseText);
+	var feature = stuff.feature;
+	var level = stuff.level;
+	var popupText = "<p>Level: "+level+
+    			"<br/>Location: " + stuff.name + 
+			"<br/>Look, a banana!</p>";
+	feature.properties = { popupContent: popupText};
+	postcodeLayer.addData(feature);
+	postcodeCacheData[stuff.name] = feature;
+    }
+}
+
+function fireAJAXForPostcode(code){
+    // This needs to stay a function so the context gets re-evaluated
+    // for every xhrobj.
+    var url = 'http://www.rasilon.net/postcode_data.php?code='+encodeURIComponent(code);
+    var xhrobj = new XMLHttpRequest();
+    xhrobj.open('get', url);
+    xhrobj.onreadystatechange = function(){receivePostcodeData(xhrobj);};
+    xhrobj.send(null);
+}
+
+function receiveMarkers(data){
+    if(data.readyState == 4) {
+	var stuff = JSON.parse(data.responseText);
+	console.log(stuff);
 	if(typeof stuff == 'undefined' || stuff.status != 'OK'){
 	    return;
 	}
 	var level = stuff.level;
-	// We aren't bothering with caching, so clear
-	// the layer every time we get a new file.
-	postcodeLayer.clearLayers();
 
-	// Caching stuff.  Doesn't do anything useful at the moment.
+	var addFromCache = false;
+	if(level !== lastLevel){
+	    postcodeLayer.clearLayers();
+	    addFromCache = true;
+	}
+
+	var codeList = stuff.codes;
+	console.log(codeList);
+	for(var i = 0;i<codeList.length;i++){
+	    var code = codeList[i];
+	    var codeData = postcodeCacheData[code];
+
+	    if(typeof codeData == 'undefined'){
+		// It's not in the cache, so fetch it
+		fireAJAXForPostcode(code);
+	    }else{
+		//console.log("Found cache data for "+code);
+		if(addFromCache)postcodeLayer.addData(codeData);
+	    }
+	}
+
+	/*
 	if(level !== lastLevel){
 	    postcodeLayer.clearLayers();
 	    console.log("Clearing layer. Was "+lastLevel+" now "+level);
 	    lastLevel = level;
 	}
-	for (var prop in stuff) {
-	    // skip loop if the property is from prototype
-	    if(!stuff.hasOwnProperty(prop)) continue;
-	    if(prop == 'status') continue;
-	    if(prop == 'level') continue;
-
-	    var feature = stuff[prop];
-	    var popupText = "<p>Level: "+level+
-			    "<br/>Location: " + prop + 
-			    "<br/>Look, a banana!</p>";
-    	    feature.properties = { popupContent: popupText};
-	    postcodeLayer.addData(stuff[prop]);
-	}
+	*/
     }
 }
 
@@ -121,9 +150,9 @@ function onMove(e){
 	"&n="+bounds.getNorth() +
 	"&zoom="+map.getZoom()
 	;
-    xhrobj = new XMLHttpRequest();
-    xhrobj.onreadystatechange = receiveMarkers;
-    var url = 'http://www.rasilon.net/postcodes_for_bounds.php?'+params;
+    var xhrobj = new XMLHttpRequest();
+    xhrobj.onreadystatechange = function(){receiveMarkers(xhrobj);};
+    var url = 'http://www.rasilon.net/postcode_list_for_bounds.php?'+params;
     console.log("Requested ["+url+"]");
     xhrobj.open('get', url);
     xhrobj.send(null);
@@ -146,7 +175,7 @@ function initMaps(){
 
 
     var osm = L.tileLayer('/osm/{z}/{x}/{y}.png', {
-	maxZoom: 16,
+	maxZoom: 17,
 	minZoom: 5,
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 		'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
