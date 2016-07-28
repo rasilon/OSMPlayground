@@ -77,20 +77,6 @@ function onNewPostcode(feature, layer) {
 var lastLevel = "init";
 var postcodeCacheData = {};
 
-function receivePostcodeData(data){
-    if(data.readyState == 4) {
-	var stuff = JSON.parse(data.responseText);
-	var feature = stuff.feature;
-	var level = stuff.level;
-	var popupText = "<p>Level: "+level+
-    			"<br/>Location: " + stuff.name + 
-			"<br/>Look, a banana!</p>";
-	feature.properties = { popupContent: popupText};
-	postcodeLayer.addData(feature);
-	postcodeCacheData[stuff.name] = feature;
-    }
-}
-
 function receivePostcodeDataList(data){
     if(data.readyState == 4) {
 	if(data.status != 200) {
@@ -110,33 +96,25 @@ function receivePostcodeDataList(data){
 	    postcodeLayer.addData(feature);
 	    postcodeCacheData[stuff.name] = feature;
 	}
+	console.log("Feature cache now contains "+Object.keys(postcodeCacheData).length+" entries.");
     }
 }
 
-function fireAJAXForPostcode(code){
-    // This needs to stay a function so the context gets re-evaluated
-    // for every xhrobj.
-    var url = 'http://www.rasilon.net/postcode_data.php?code='+encodeURIComponent(code);
-    var xhrobj = new XMLHttpRequest();
-    xhrobj.open('get', url);
-    xhrobj.onreadystatechange = function(){receivePostcodeData(xhrobj);};
-    xhrobj.send(null);
-}
-
 function fireAJAXForPostcodeList(codes){
-    var url = 'http://www.rasilon.net/postcode_data_list.php?codes='+encodeURIComponent(codes.join(","));
+    var url = 'http://www.rasilon.net/postcode_data_list.php';
+    var post = 'codes='+encodeURIComponent(codes.join(","))
     console.log("Requesting postcode list from ["+url+"]")
     var xhrobj = new XMLHttpRequest();
-    xhrobj.open('get', url);
+    xhrobj.open('post', url);
+    xhrobj.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     xhrobj.onreadystatechange = function(){receivePostcodeDataList(xhrobj);};
-    xhrobj.send(null);
+    xhrobj.send(post);
 }
 
 
 function receiveMarkers(data){
     if(data.readyState == 4) {
 	var stuff = JSON.parse(data.responseText);
-	console.log(stuff);
 	if(typeof stuff == 'undefined' || stuff.status != 'OK'){
 	    return;
 	}
@@ -221,6 +199,15 @@ function initMaps(){
      	onEachFeature: onNewPostcode
 	}).addTo(map);
     onMove(null); // Init the postcodes.
+
+    L.control.search({
+	url: 'http://www.rasilon.net/find_postcode.php?q={s}',
+	textPlaceholder: 'Postcode...',
+	collapsed: false,
+	//markerIcon: new L.Icon({iconUrl:'data/custom-icon.png', iconSize: [20,20]}),
+	markerLocation: true
+    }).addTo(map);
+
 
     osm.addTo(map);
 
