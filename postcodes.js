@@ -91,6 +91,28 @@ function receivePostcodeData(data){
     }
 }
 
+function receivePostcodeDataList(data){
+    if(data.readyState == 4) {
+	if(data.status != 200) {
+	    console.log("AJAX response was "+data.status+" so bailing on this one.");
+	    return;
+	}
+	var postcodeData = JSON.parse(data.responseText);
+	for(var i = 0; i< postcodeData.length;i++){
+	    var stuff = postcodeData[i];
+
+	    var feature = stuff.feature;
+	    var level = stuff.level;
+	    var popupText = "<p>Level: "+level+
+			    "<br/>Location: " + stuff.name + 
+			    "<br/>Look, a banana!</p>";
+	    feature.properties = { popupContent: popupText};
+	    postcodeLayer.addData(feature);
+	    postcodeCacheData[stuff.name] = feature;
+	}
+    }
+}
+
 function fireAJAXForPostcode(code){
     // This needs to stay a function so the context gets re-evaluated
     // for every xhrobj.
@@ -100,6 +122,16 @@ function fireAJAXForPostcode(code){
     xhrobj.onreadystatechange = function(){receivePostcodeData(xhrobj);};
     xhrobj.send(null);
 }
+
+function fireAJAXForPostcodeList(codes){
+    var url = 'http://www.rasilon.net/postcode_data_list.php?codes='+encodeURIComponent(codes.join(","));
+    console.log("Requesting postcode list from ["+url+"]")
+    var xhrobj = new XMLHttpRequest();
+    xhrobj.open('get', url);
+    xhrobj.onreadystatechange = function(){receivePostcodeDataList(xhrobj);};
+    xhrobj.send(null);
+}
+
 
 function receiveMarkers(data){
     if(data.readyState == 4) {
@@ -118,18 +150,21 @@ function receiveMarkers(data){
 
 	var codeList = stuff.codes;
 	console.log(codeList);
+	var codesNeeded = [];
 	for(var i = 0;i<codeList.length;i++){
 	    var code = codeList[i];
 	    var codeData = postcodeCacheData[code];
 
 	    if(typeof codeData == 'undefined'){
 		// It's not in the cache, so fetch it
-		fireAJAXForPostcode(code);
+		//fireAJAXForPostcode(code);
+		codesNeeded.push(code);
 	    }else{
 		//console.log("Found cache data for "+code);
 		if(addFromCache)postcodeLayer.addData(codeData);
 	    }
 	}
+	fireAJAXForPostcodeList(codesNeeded);
 
 	/*
 	if(level !== lastLevel){
