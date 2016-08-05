@@ -187,6 +187,14 @@ function initMaps(){
     }
 
 
+    var simplified = L.tileLayer('/tiles/simplified/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	minZoom: 5,
+	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+		'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
+	id: 'bear.mapnik'
+    });
+
     var osm = L.tileLayer('/osm/{z}/{x}/{y}.png', {
 	maxZoom: 17,
 	minZoom: 5,
@@ -212,7 +220,8 @@ function initMaps(){
     osm.addTo(map);
 
     var baseMaps = {
-	"Mapnik": osm
+	"Local Simplified OSM": simplified,
+	"Local Base OSM": osm
     };
     var overlayMaps = {
 	"Postcodes": postcodeLayer
