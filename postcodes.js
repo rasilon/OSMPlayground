@@ -154,6 +154,13 @@ function receiveMarkers(data){
     }
 }
 
+function onClick(e){
+    var a = ""+
+	e.latlng+
+	"\n"+
+	"SRID=4326;POINT("+ e.latlng.lng + " " + e.latlng.lat + ")";
+    alert(a);
+}
 function onMove(e){
     var bounds = map.getBounds();
     var params=
@@ -231,5 +238,6 @@ function initMaps(){
     layers.addTo(map);
     map.addControl(new L.Control.Permalink({text: 'Permalink', layers: layers}));
     map.on('moveend', onMove);
+    map.on('dblclick', onClick);
 
 }
