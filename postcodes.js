@@ -190,7 +190,12 @@ function initMaps(){
 	// We're using the URL to override
 	paramLon = getParam("lon");
 	paramZoom = getParam("zoom");
-	map =  L.map('map').setView([paramLat,  paramLon],  paramZoom);
+	try{
+	    map =  L.map('map').setView([paramLat,  paramLon],  paramZoom);
+	}catch(e){
+	    console.log("Failed to create map from parameters: "+JSON.stringify(e));
+	    map = mapFromCookie();
+	}
     }
 
 

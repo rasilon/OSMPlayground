@@ -9,6 +9,19 @@ function onLocationError(e) {
     alert(e.message);
 }
 
+function resetMap(map){
+    document.getElementById('map').innerHTML = "";
+    if (typeof map === 'undefined')return;
+    try{
+	map.off();
+	map.remove();
+	map = undefined;
+    }catch(e){
+	console.log("Tried to remove a defined map, but failed: "+JSON.stringify(e));
+    }
+}
+
+
 // === Some cookie parameters === 
 var cookiename = "mapinfo"; // name for this cookie 
 var expiredays = 7; // number of days before cookie expiry 
@@ -37,8 +50,18 @@ function getParam(val) {
 	if(kv[0] === val) return kv[1];
       }
 }
-function mapFromCookie(){
-    var localmap;
+function mapstartFromParams(){
+   var paramLat = getParam("lat");
+    if(typeof paramLat  === 'undefined'){
+        return undefined;
+    }else{
+        // We're using the URL to override
+        paramLon = getParam("lon");
+        paramZoom = getParam("zoom");
+        return [paramLat,paramLon,paramZoom];
+    }
+}
+function mapstartFromCookie(){
     if (document.cookie.length>0) { 
     	cookieStart = document.cookie.indexOf(cookiename + "="); 
 	if (cookieStart!=-1) { 
@@ -54,7 +77,7 @@ function mapFromCookie(){
 	    lat = parseFloat(bits[0]); 
 	    lon = parseFloat(bits[1]); 
 	    zoom = parseInt(bits[2]); 
-	    localmap = L.map('map').setView([lat, lon], zoom);
+	    return [lat, lon, zoom];
 
 	} 
     } 
@@ -67,23 +90,26 @@ function mapFromCookie(){
 }
 
 function initMaps(){
-    var paramLat = getParam("lat");
-    if(typeof paramLat  === 'undefined'){
-	map = mapFromCookie();
-	if (typeof map === 'undefined'){
-	    alert("No Map!");
-	    return;
+    map =  L.map('map');
+
+    var cookieStart = mapstartFromCookie();
+    var paramStart = mapstartFromParams();
+
+    try{
+	map.setView([paramStart[0],  paramStart[1]],  paramStart[2]);
+	console.log("Initialised map location from query parameters");
+    }catch(e){
+	console.log("Couldn't set map from params.  Falling back to cookie");
+	try{
+	    map.setView([cookieStart[0],  cookieStart[1]],  cookieStart[2]);
+	}catch(e){
+	    console.log("Couldn't set map from cookie.  Falling back to defaults");
 	}
-    }else{
-	// We're using the URL to override
-	paramLon = getParam("lon");
-	paramZoom = getParam("zoom");
-	map =  L.map('map').setView([paramLat,  paramLon],  paramZoom);
     }
 
 
     var osm = L.tileLayer('/osm/{z}/{x}/{y}.png', {
-	maxZoom: 16,
+	maxZoom: 17,
 	minZoom: 5,
 	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
 		'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ',
@@ -139,6 +165,15 @@ function initMaps(){
 	var m = L.marker([marilynsArray[i].lat, marilynsArray[i].lng]).bindPopup(marilynsArray[i].hill_name);
 	newMarilynLayer.addLayer(m);
     }
+
+    L.control.search({
+      	url: 'http://www.rasilon.net/find_postcode.php?q={s}',
+	textPlaceholder: 'Postcode...',
+	collapsed: false,
+	//markerIcon: new L.Icon({iconUrl:'data/custom-icon.png', iconSize: [20,20]}),
+	markerLocation: true
+	}).addTo(map);
+
 
     osm.addTo(map);
     contours.addTo(map);
