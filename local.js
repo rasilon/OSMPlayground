@@ -81,12 +81,7 @@ function mapstartFromCookie(){
 
 	} 
     } 
-    if (typeof localmap === 'undefined'){
-	localmap = L.map('map').setView([55.950, -3.203 ], 16);
-	localmap.locate({setView: true, maxZoom: 16});
-    }
-
-    return localmap;
+    return null;
 }
 
 function initMaps(){
@@ -104,6 +99,7 @@ function initMaps(){
 	    map.setView([cookieStart[0],  cookieStart[1]],  cookieStart[2]);
 	}catch(e){
 	    console.log("Couldn't set map from cookie.  Falling back to defaults");
+	    map.setView([55.951,-3.200],15);
 	}
     }
 
