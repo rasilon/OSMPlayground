@@ -150,6 +150,20 @@ function initMaps(){
 	attribution: '| Geology layers: Based upon DiGMapGB-625, with the permission of the British Geological Survey'
     });
 
+    var constituencies = L.tileLayer('/tiles/constituencies/{z}/{x}/{y}.png', {
+	maxZoom: 16,
+	id: 'bear.constituencies',
+	opacity: 1.0,
+	attribution: '| '
+    });
+
+    var regions = L.tileLayer('/tiles/regions/{z}/{x}/{y}.png', {
+	maxZoom: 16,
+	id: 'bear.regions',
+	opacity: 1.0,
+	attribution: '| '
+    });
+
     var newMarilynLayer = new L.MarkerClusterGroup({
     	iconCreateFunction: function(cluster) {
     	    var n = '<b>' + cluster.getChildCount() + '</b>';
@@ -205,7 +219,9 @@ function initMaps(){
 	"Solid": solid,
 	"Dykes": dykes,
 	"Faults": faults,
-	"Marilyn Markers": newMarilynLayer
+	"Marilyn Markers": newMarilynLayer,
+	"Scottish Constituencies": constituencies,
+	"Scottish Regions": regions
     };
 
     var layers = L.control.layers(baseMaps, overlayMaps);
