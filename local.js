@@ -147,21 +147,21 @@ function initMaps(){
     });
 
     var constituencies = L.tileLayer('/tiles/constituencies/{z}/{x}/{y}.png', {
-	maxZoom: 16,
+	maxZoom: 18,
 	id: 'bear.constituencies',
 	opacity: 1.0,
 	attribution: '| '
     });
 
     var ukconstituencies = L.tileLayer('/tiles/ukconstituencies/{z}/{x}/{y}.png', {
-	maxZoom: 16,
+	maxZoom: 18,
 	id: 'bear.ukconstituencies',
 	opacity: 1.0,
 	attribution: '| '
     });
 
     var regions = L.tileLayer('/tiles/regions/{z}/{x}/{y}.png', {
-	maxZoom: 16,
+	maxZoom: 18,
 	id: 'bear.regions',
 	opacity: 1.0,
 	attribution: '| '
