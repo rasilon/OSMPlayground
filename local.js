@@ -153,6 +153,13 @@ function initMaps(){
 	attribution: '| '
     });
 
+    var ukconstituencies = L.tileLayer('/tiles/ukconstituencies/{z}/{x}/{y}.png', {
+	maxZoom: 16,
+	id: 'bear.ukconstituencies',
+	opacity: 1.0,
+	attribution: '| '
+    });
+
     var regions = L.tileLayer('/tiles/regions/{z}/{x}/{y}.png', {
 	maxZoom: 16,
 	id: 'bear.regions',
@@ -186,8 +193,8 @@ function initMaps(){
 
 
     osm.addTo(map);
-    contours.addTo(map);
-    osgb.addTo(map);
+    //contours.addTo(map);
+    //osgb.addTo(map);
 
     if(getParam("marilyns")){
 	newMarilynLayer.addTo(map);
@@ -205,6 +212,14 @@ function initMaps(){
 	faults.addTo(map);
     }
 
+    if(getParam("constituencies")){
+	constituencies.addTo(map);
+    }
+
+    if(getParam("ukconstituencies")){
+	ukconstituencies.addTo(map);
+    }
+
 
     var baseMaps = {
 	"Mapnik": osm
@@ -217,7 +232,8 @@ function initMaps(){
 	"Faults": faults,
 	"Marilyn Markers": newMarilynLayer,
 	"Scottish Constituencies": constituencies,
-	"Scottish Regions": regions
+	"Scottish Regions": regions,
+	"UK Constituencies": ukconstituencies
     };
 
     var layers = L.control.layers(baseMaps, overlayMaps);
