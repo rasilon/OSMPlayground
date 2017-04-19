@@ -157,7 +157,7 @@ function initMaps(){
 	maxZoom: 18,
 	id: 'bear.ukconstituencies',
 	opacity: 1.0,
-	attribution: '| '
+	attribution: '| OS OpenData'
     });
 
     var regions = L.tileLayer('/tiles/regions/{z}/{x}/{y}.png', {
