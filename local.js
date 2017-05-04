@@ -147,21 +147,28 @@ function initMaps(){
     });
 
     var constituencies = L.tileLayer('/tiles/constituencies/{z}/{x}/{y}.png', {
-	maxZoom: 18,
+	maxZoom: 17,
 	id: 'bear.constituencies',
 	opacity: 1.0,
 	attribution: '| '
     });
 
     var ukconstituencies = L.tileLayer('/tiles/ukconstituencies/{z}/{x}/{y}.png', {
-	maxZoom: 18,
+	maxZoom: 17,
 	id: 'bear.ukconstituencies',
 	opacity: 1.0,
 	attribution: '| OS OpenData'
     });
 
+    var councilwards = L.tileLayer('/tiles/council_wards/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	id: 'bear.councilwards',
+	opacity: 1.0,
+	attribution: '| OS OpenData'
+    });
+
     var regions = L.tileLayer('/tiles/regions/{z}/{x}/{y}.png', {
-	maxZoom: 18,
+	maxZoom: 17,
 	id: 'bear.regions',
 	opacity: 1.0,
 	attribution: '| '
@@ -220,6 +227,10 @@ function initMaps(){
 	ukconstituencies.addTo(map);
     }
 
+    if(getParam("councilwards")){
+	councilwards.addTo(map);
+    }
+
 
     var baseMaps = {
 	"Mapnik": osm
@@ -233,7 +244,8 @@ function initMaps(){
 	"Marilyn Markers": newMarilynLayer,
 	"Scottish Constituencies": constituencies,
 	"Scottish Regions": regions,
-	"UK Constituencies": ukconstituencies
+	"UK Constituencies": ukconstituencies,
+	"UK Council Wards": councilwards
     };
 
     var layers = L.control.layers(baseMaps, overlayMaps);
